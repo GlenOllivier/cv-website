@@ -1,0 +1,18 @@
+
+language: node_js
+node_js:
+  - "12"
+before_script:
+  - npm install
+script: npm run build
+after_script:
+  - cp dist/cv-website/index.html dist/cv-website/404.html
+deploy:
+  local-dir: dist/cv-website
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  on:
+    branch: master
+notifications:
+  email: false
