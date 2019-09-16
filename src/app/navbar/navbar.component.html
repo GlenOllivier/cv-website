@@ -1,0 +1,23 @@
+
+<h1 class="m-5 text-center display-3">Glen Ollivier</h1>
+<nav class="navbar navbar-expand-lg navbar-dark elegant-color-dark sticky-top shadow-sm rounded">
+    <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed" aria-controls="navbarLinks" [attr.aria-expanded]="!isCollapsed" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+  <div class="collapse navbar-collapse" id="navbarLinks" [ngbCollapse]="isCollapsed">
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item mx-2">
+      <a class="nav-link" [routerLink]="['/']" routerLinkActive="active">CV</a>
+    </li>
+    <li>
+        <a class="nav-link" [routerLink]="['/projets']" routerLinkActive="active">Projets</a>
+    </li>
+    <li class="nav-item mx-2">
+      <a class="nav-link" [routerLink]="['/contact']" routerLinkActive="active">Contact</a>
+    </li>
+  </ul>
+  <form class="form-inline">
+    <button class="btn btn-outline-light" >Télécharger pdf</button>
+  </form>
+  </div>
+</nav>
