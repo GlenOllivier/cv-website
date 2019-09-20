@@ -4,7 +4,7 @@ node_js:
   - "12"
 before_script:
   - npm install
-script: 
+script:
   - npm run build
   - cp dist/cv-website/index.html dist/cv-website/404.html
 deploy:
