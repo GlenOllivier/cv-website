@@ -1,27 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import * as p5 from 'p5';
 
 @Component({
   selector: 'app-ray-casting',
   templateUrl: './ray-casting.component.html',
-  styleUrls: ['./ray-casting.component.scss']
+  styleUrls: ['./ray-casting.component.scss'],
+  host: {
+    '(window:resize)': 'onResize($event)'
+  }
 })
-export class RayCastingComponent implements OnInit {
+export class RayCastingComponent implements OnInit, AfterViewInit {
+
+  
+  @ViewChild('rayCastingCanvas', {static: false}) rayCastingCanvas: ElementRef;
 
   private p5: any;
 
   private nbMurs: number = 5;
   private maxDist: number;
   private res: number;
+  private canvasWidth: number = 800;
   
-  private murs: any = [];
+  private murs: any;
   private player: any;
   private wallColor: any;
 
   private sketch = (p:any) => {
     p.setup = () => {
-      p.createCanvas(800, 400).parent("ray-casting-canvas");
+      p.createCanvas(this.canvasWidth, this.canvasWidth/2).parent("ray-casting-canvas");
 
+      this.murs = [];
 
       for(let i=0; i < this.nbMurs; i++) {
         this.murs.push({x1: p.random(p.width/2), y1: p.random(p.height), x2:p.random(p.width/2), y2: p.random(p.height)});
@@ -43,10 +51,11 @@ export class RayCastingComponent implements OnInit {
         p.line(mur.x1, mur.y1, mur.x2, mur.y2);
       });
     
-      for(let i = 0; i < this.res/2; i++) {
+      for(let i = 0; i < this.res/2 ; i++) {
         let angle = Math.atan(2/this.res * i);
         
         p.stroke(255);
+        
         let obstacle = this.getObstacle(this.player.x, this.player.y, this.player.t + angle);
         p.line(this.player.x, this.player.y, obstacle.x, obstacle.y);
         
@@ -58,33 +67,45 @@ export class RayCastingComponent implements OnInit {
         
         p.stroke(this.wallColor);
         p.fill(this.wallColor);
-        p.rect(3*p.width/4 - (i+1)*p.width/(2*this.res), (p.height-rectSize)/2,p.width/(2*this.res),rectSize);
+        p.rect(3*p.width/4 - i*p.width/(2*this.res - 1), (p.height-rectSize)/2,p.width/(2*this.res - 1),rectSize);
         
-        angle = - angle;
+        if(angle !== 0 ){
+          
+          angle = - angle;
         
-        p.stroke(255);
-        obstacle = this.getObstacle(this.player.x, this.player.y, this.player.t + angle);
-        p.line(this.player.x, this.player.y, obstacle.x, obstacle.y);
+          p.stroke(255);
+          obstacle = this.getObstacle(this.player.x, this.player.y, this.player.t + angle);
+          p.line(this.player.x, this.player.y, obstacle.x, obstacle.y);
         
-        c = Math.cos(angle)* p.dist(obstacle.x, obstacle.y, this.player.x, this.player.y);
-        b = Math.sqrt(p.sq(p.height) + p.sq(c));
+          c = Math.cos(angle)* p.dist(obstacle.x, obstacle.y, this.player.x, this.player.y);
+          b = Math.sqrt(p.sq(p.height) + p.sq(c));
         
-        ta = Math.acos((p.sq(b) + p.sq(c) - p.sq(p.height))/(2*b*c));
-        rectSize = 0.3*p.height/2*Math.sin(ta)/Math.sin(Math.PI/2-ta);
+          ta = Math.acos((p.sq(b) + p.sq(c) - p.sq(p.height))/(2*b*c));
+          rectSize = 0.3*p.height/2*Math.sin(ta)/Math.sin(Math.PI/2-ta);
         
-        p.stroke(this.wallColor);
-        p.fill(this.wallColor);
-        p.rect(i*p.width/(2*this.res) + 3*p.width/4, (p.height-rectSize)/2,p.width/(2*this.res),rectSize);
+          p.stroke(this.wallColor);
+          p.fill(this.wallColor);
+          p.rect((i-1)*p.width/(2*this.res - 1) + 3*p.width/4, (p.height-rectSize)/2,p.width/(2*this.res - 1),rectSize);
+        }
       }
     };
-
-    
   };
-
   constructor() { }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+    this.canvasWidth = this.rayCastingCanvas.nativeElement.offsetWidth;
     this.p5 = new p5(this.sketch);
+  }
+
+  onResize(event) {
+    if(this.rayCastingCanvas.nativeElement.offsetWidth != this.canvasWidth) {
+      this.canvasWidth = this.rayCastingCanvas.nativeElement.offsetWidth;
+      this.p5.remove();
+      this.p5 = new p5(this.sketch);
+    }
   }
 
   update(p:any) {  
